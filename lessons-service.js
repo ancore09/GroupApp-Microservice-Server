@@ -11,7 +11,7 @@ const connection = mysql.createPool({
 const bodyParser = require("body-parser");
 
 const service = new MicroMQ({
-    name: 'news',
+    name: 'lessons',
     rabbit: {
         url: 'amqp://localhost:5672',
     },
@@ -20,7 +20,7 @@ service.use(bodyParser.json());
 service.use(bodyParser.urlencoded({ extended: true }));
 
 service.get('/getLearning', (req, res) => {
-    let login = req.query.loginid;
+    let loginid = req.query.loginid;
 
     let querydata = [];
     querydata.push(loginid);

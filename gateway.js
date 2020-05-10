@@ -8,9 +8,6 @@ const gateway = new Gateway({
     rabbit: {
         url: 'amqp://localhost:5672',
     },
-    requests: {
-        timeout: 5000,
-    },
 });
 
 app.use(gateway.middleware())
@@ -35,34 +32,32 @@ app.get('/getLearning', async (req, res) => {
     await res.delegate('lessons')
 });
 
-app.post('/postLesson', (req, res) => {
-
+app.post('/postLesson', async (req, res) => {
+    await res.delegate('lessons')
 });
 
-app.put('/editLesson', (req, res) => {
-
+app.put('/editLesson', async (req, res) => {
+    await res.delegate('lessons')
 });
 
-
-app.get('/getUserMarks', (req, res) => {
-
+app.get('/getUserMarks', async (req, res) => {
+    await res.delegate('lessons')
 });
 
-app.get('/getMarks', (req, res) => {
-
+app.get('/getMarks', async (req, res) => {
+    await res.delegate('lessons')
 });
 
-app.post('/putUserMark', (req, res) => {
-
+app.post('/putUserMark', async (req, res) => {
+    await res.delegate('lessons')
 });
 
-app.get('/getEvaluation', (req, res) => {
-
+app.get('/getEvaluation', async (req, res) => {
+    await res.delegate('lessons')
 });
 
-
-app.get('/getLessons', (req, res) => {
-
+app.get('/getLessons', async (req, res) => {
+    await res.delegate('lessons')
 });
 
 app.listen(3000);
