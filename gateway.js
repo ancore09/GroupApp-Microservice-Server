@@ -4,7 +4,7 @@ const express = require('express')
 const app = express()
 
 const gateway = new Gateway({
-    microservices: ['news', 'lessons', 'groups'],
+    microservices: ['news', 'lessons', 'groups-users'],
     rabbit: {
         url: 'amqp://localhost:5672',
     },
@@ -60,14 +60,36 @@ app.get('/getLessons', async (req, res) => {
     await res.delegate('lessons')
 });
 
-//MARK: Groups
+//MARK: Users
 
-app.get('/getGroups', async (req, res) => {
-    await res.delegate('groups')
+app.get('/auth', async (req, res) => {
+    await res.delegate('groups-users')
 });
 
-app.get('/getGrouping', async (req, res) => {
-    await res.delegate('groups')
+app.get('/getMemberData',  async (req, res) => {
+    await res.delegate('groups-users')
+});
+
+app.post('/regUser',  async (req, res) => {
+    await res.delegate('groups-users')
+});
+
+app.get("/getUsers",  async (req, res) => {
+    await res.delegate('groups-users')
+});
+
+app.post('/addUserToGroup',  async (req, res) => {
+    await res.delegate('groups-users')
+});
+
+//MARK: Groups
+
+app.get('/getGroup',  async (req, res) => {
+    await res.delegate('groups-users')
+});
+
+app.get('/getGrouping',  async (req, res) => {
+    await res.delegate('groups-users')
 });
 
 app.listen(3000);
