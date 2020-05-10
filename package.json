@@ -2,7 +2,7 @@
   "name": "GroupAppMicroservicesServer",
   "version": "1.0.0",
   "description": "GroupAppMicroservicesServer",
-  "main": "index.js",
+  "main": "gateway.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "micromq": "^3.0.2"
+    "micromq": "^3.0.2",
+    "mysql2": "^2.1.0"
   }
 }
