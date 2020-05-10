@@ -4,7 +4,7 @@ const express = require('express')
 const app = express()
 
 const gateway = new Gateway({
-    microservices: ['news', 'lessons'],
+    microservices: ['news', 'lessons', 'groups'],
     rabbit: {
         url: 'amqp://localhost:5672',
     },
@@ -58,6 +58,16 @@ app.get('/getEvaluation', async (req, res) => {
 
 app.get('/getLessons', async (req, res) => {
     await res.delegate('lessons')
+});
+
+//MARK: Groups
+
+app.get('/getGroups', async (req, res) => {
+    await res.delegate('groups')
+});
+
+app.get('/getGrouping', async (req, res) => {
+    await res.delegate('groups')
 });
 
 app.listen(3000);
