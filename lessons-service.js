@@ -13,7 +13,7 @@ const bodyParser = require("body-parser");
 const service = new MicroMQ({
     name: 'lessons',
     rabbit: {
-        url: 'amqp://localhost:5672',
+        url: 'amqp://' + env.rabbitip + ':5672',
     },
 });
 service.use(bodyParser.json());

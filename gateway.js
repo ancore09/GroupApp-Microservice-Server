@@ -1,16 +1,15 @@
 const Gateway = require('micromq/gateway');
-const express = require('express')
-
-const app = express()
+const express = require('express');
+const app = express();
 
 const gateway = new Gateway({
-    microservices: ['news', 'lessons', 'groups-users'],
+    microservices: ['news', 'lessons', 'groups-users', 'files'],
     rabbit: {
-        url: 'amqp://localhost:5672',
+        url: 'amqp://' + env.rabbitip + ':5672',
     },
 });
 
-app.use(gateway.middleware())
+app.use(gateway.middleware());
 
 //MARK: News
 
@@ -90,6 +89,16 @@ app.get('/getGroup',  async (req, res) => {
 
 app.get('/getGrouping',  async (req, res) => {
     await res.delegate('groups-users')
+});
+
+//MARK: Files
+
+app.post('/uploadFile',  async (req, res) => {
+    await res.delegate('files')
+});
+
+app.post('/upload-photos',  async (req, res) => {
+    await res.delegate('files')
 });
 
 app.listen(3000);
