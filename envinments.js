@@ -1,7 +1,7 @@
 let database = 'LearningGroupsDB';
 let password = 'R5jFNB6vak'
 let user = 'root'
-let rabbitip = '172.19.0.2'
+let rabbitip = '194.67.92.182'
 module.exports = {
     database,
     password,

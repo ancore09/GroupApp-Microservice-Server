@@ -8,7 +8,7 @@ const connection = mysql.createPool({
     database: env.database,
     password: env.password
 });
-const bodyParser = require("body-parser");
+//const bodyParser = require("body-parser");
 
 const service = new MicroMQ({
     name: 'lessons',
@@ -16,8 +16,8 @@ const service = new MicroMQ({
         url: 'amqp://' + env.rabbitip + ':5672',
     },
 });
-service.use(bodyParser.json());
-service.use(bodyParser.urlencoded({ extended: true }));
+//service.use(bodyParser.json());
+//service.use(bodyParser.urlencoded({ extended: true }));
 
 service.get('/getLearning', (req, res) => {
     let loginid = req.query.loginid;
@@ -35,43 +35,49 @@ service.get('/getLearning', (req, res) => {
 service.post('/postLesson', (req, res) => {
     let querydata = Object.values(req.body);
 
+    //let querydata = req.params;
+
     let sql1 = 'INSERT INTO lessons (group_id, datedmy, theme, homework, profcomment, times) VALUES(?,?,?,?,?,?)';
     let sql2 = 'SELECT COUNT(*) AS c FROM usergrouping WHERE group_id = (?)'
     let sql3 = 'INSERT INTO evaluating (lesson_id) VALUES(?)';
     let sql4 = 'INSERT INTO learning (user_id) SELECT user_id FROM usergrouping WHERE group_id = (?)';
     let sql5 = 'UPDATE learning SET evaluation_id = (?) WHERE ID IN (?)'
 
-    connection.query(sql1, querydata, (err, results1) => {
-        if (err) return console.log(err);
-        console.log("LESSON INSERT")
+    // connection.query(sql1, querydata, (err, results1) => {
+    //     if (err) return console.log(err);
+    //     console.log("LESSON INSERT")
+    //
+    //     connection.query(sql2, [querydata[0]], (err, results2) => {
+    //         if (err) return console.log(err);
+    //         console.log("STUDENT COUNT")
+    //
+    //         connection.query(sql4, [querydata[0]], (err, results4) => {
+    //             if (err) return console.log(err);
+    //             console.log("LEARNING INSERT")
+    //
+    //             for (let i = 0; i < results2[0].c; i++) {
+    //                 connection.query(sql3, [results1.insertId], (err, results3) => {
+    //                     if (err) return console.log(err);
+    //                     console.log("EVALUATING INSERT")
+    //
+    //                     for (let j = 0; j < results4.affectedRows; j++) {
+    //                         connection.query(sql5, [results3.insertId, results4.insertId + j], (err, results5) => {
+    //                             if (err) return console.log(err);
+    //                             console.log("LEARNING UPDATE")
+    //                             //res.send(results5)
+    //                         });
+    //                     }
+    //                     res.json({
+    //                         ok: true
+    //                     });
+    //                 });
+    //             }
+    //         });
+    //     });
+    // });
 
-        connection.query(sql2, [querydata[0]], (err, results2) => {
-            if (err) return console.log(err);
-            console.log("STUDENT COUNT")
-
-            connection.query(sql4, [querydata[0]], (err, results4) => {
-                if (err) return console.log(err);
-                console.log("LEARNING INSERT")
-
-                for (let i = 0; i < results2[0].c; i++) {
-                    connection.query(sql3, [results1.insertId], (err, results3) => {
-                        if (err) return console.log(err);
-                        console.log("EVALUATING INSERT")
-
-                        for (let j = 0; j < results4.affectedRows; j++) {
-                            connection.query(sql5, [results3.insertId, results4.insertId + j], (err, results5) => {
-                                if (err) return console.log(err);
-                                console.log("LEARNING UPDATE")
-                                //res.send(results5)
-                            });
-                        }
-                        res.json({
-                            ok: true
-                        });
-                    });
-                }
-            });
-        });
+    res.json({
+        ok: true
     });
 });
 

@@ -1,16 +1,18 @@
 const Gateway = require('micromq/gateway');
 const express = require('express');
 const app = express();
-
+const env = require('./envinments');
+const bodyParser = require("body-parser");
 const gateway = new Gateway({
-    microservices: ['news', 'lessons', 'groups-users', 'files'],
+    microservices: ['news', 'lessons', 'groups-users'],
     rabbit: {
         url: 'amqp://' + env.rabbitip + ':5672',
     },
 });
 
 app.use(gateway.middleware());
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 //MARK: News
 
 app.get('/getNews', async (req, res) => {

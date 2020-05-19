@@ -65,7 +65,7 @@ service.get("/getUsers", (req, res) => {
         console.log(results);
         res.json(results);
     })
-})
+});
 
 service.post('/addUserToGroup', (req,res) => {
     let querydata = Object.values(req.body);
@@ -73,7 +73,8 @@ service.post('/addUserToGroup', (req,res) => {
     let sql1 = 'INSERT INTO usergrouping(User_ID, Group_ID) VALUES (?,?)';
     let sql2 = 'INSERT INTO evaluating(lesson_ID) SELECT ID FROM lessons WHERE Group_ID = ?';
     let sql3 = 'INSERT INTO learning(User_ID, Evaluation_ID) VALUES (?,?)';
-    let sql4 = 'UPDATE learning SET Evaluation_ID = (?) WHERE User_ID = (?)';
+    let sql4 = 'INSERT INTO marks VALUE (null)';
+    let sql5 = 'UPDATE evaluating SET Mark_ID = (?) WHERE Lesson_ID = (?)';
 
     connection.query(sql1, querydata, (err, results) => {
         if (err) {
@@ -104,12 +105,34 @@ service.post('/addUserToGroup', (req,res) => {
                     }
                 });
 
+                connection.query(sql4, [], (err, results) => {
+                    console.log("MARK INSERT");
+                    if (err) {
+                        console.log(err);
+                        res.send(err);
+                        return;
+                    }
+
+                    connection.query(sql5, [results.insertId, querydata[2]], (err, results) => {
+                        console.log("MARK UPDATE");
+                        if (err) {
+                            console.log(err);
+                            res.send(err);
+                            return;
+                        }
+                    });
+                });
+
                 if (i + 1 == end_id) {
                     res.json(results);
                 }
             }
         });
     });
+});
+
+service.action('getUsers', async (req, res) => {
+    
 });
 
 //MARK: groups
