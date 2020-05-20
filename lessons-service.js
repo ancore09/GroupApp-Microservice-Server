@@ -8,7 +8,6 @@ const connection = mysql.createPool({
     database: env.database,
     password: env.password
 });
-//const bodyParser = require("body-parser");
 
 const service = new MicroMQ({
     name: 'lessons',
@@ -17,8 +16,6 @@ const service = new MicroMQ({
         url: 'amqp://' + env.rabbitip + ':5672',
     },
 });
-//service.use(bodyParser.json());
-//service.use(bodyParser.urlencoded({ extended: true }));
 
 service.get('/getLearning', (req, res) => {
     let loginid = req.query.loginid;
@@ -175,6 +172,71 @@ service.get('/getLessons', (req, res) => {
     connection.query(sql, querydata, (err, results) => {
         if (err) return console.log(err);
         res.json(results);
+    });
+});
+
+service.post('/addUserToGroup', async (req,res) => {
+    let querydata = Object.values(req.body);
+
+    let sql1 = 'INSERT INTO usergrouping(User_ID, Group_ID) VALUES (?,?)';
+    let sql2 = 'INSERT INTO evaluating(lesson_ID) SELECT ID FROM lessons WHERE Group_ID = ?';
+    let sql3 = 'INSERT INTO learning(User_ID, Evaluation_ID) VALUES (?,?)';
+    let sql4 = 'INSERT INTO marks VALUE (null)';
+    let sql5 = 'UPDATE evaluating SET Mark_ID = (?) WHERE Lesson_ID = (?)';
+
+    await service.ask('group-users', {
+        server: {
+            action: 'addUserToGroup',
+            meta: {
+                userid: querydata[0],
+                groupid: querydata[1]
+            }
+        }
+    })
+
+    connection.query(sql2, [querydata[1]], (err, results) => {
+        if (err) {
+            console.log(err);
+            res.send(err);
+            return;
+        }
+        console.log("EVALUATING INSERT");
+
+        let start_id = results.insertId;
+        let end_id = results.affectedRows + start_id;
+
+        for (let i = start_id; i < end_id; i++) {
+            connection.query(sql3, [querydata[0], i], (err, results) => {
+                console.log("LEARNING INSERT");
+                if (err) {
+                    console.log(err);
+                    res.send(err);
+                    return;
+                }
+            });
+
+            connection.query(sql4, [], (err, results) => {
+                console.log("MARK INSERT");
+                if (err) {
+                    console.log(err);
+                    res.send(err);
+                    return;
+                }
+
+                connection.query(sql5, [results.insertId, querydata[2]], (err, results) => {
+                    console.log("MARK UPDATE");
+                    if (err) {
+                        console.log(err);
+                        res.send(err);
+                        return;
+                    }
+                });
+            });
+
+            if (i + 1 == end_id) {
+                res.json(results);
+            }
+        }
     });
 });
 
