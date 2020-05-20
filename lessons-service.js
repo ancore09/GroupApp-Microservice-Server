@@ -46,10 +46,7 @@ service.post('/postLesson', async (req, res) => {
         ids.push(count.response[i].user_id)
     }
 
-    //res.json(count)
-
     let sql1 = 'INSERT INTO lessons (group_id, datedmy, theme, homework, profcomment, times) VALUES(?,?,?,?,?,?)';
-    //let sql2 = 'SELECT COUNT(*) AS c FROM usergrouping WHERE group_id = (?)'
     let sql3 = 'INSERT INTO evaluating (lesson_id) VALUES (?)';
     let sql4 = 'INSERT INTO learning (user_id) VALUES (?)';
     let sql5 = 'UPDATE learning SET evaluation_id = (?) WHERE ID IN (?)'
@@ -178,7 +175,6 @@ service.get('/getLessons', (req, res) => {
 service.post('/addUserToGroup', async (req,res) => {
     let querydata = Object.values(req.body);
 
-    let sql1 = 'INSERT INTO usergrouping(User_ID, Group_ID) VALUES (?,?)';
     let sql2 = 'INSERT INTO evaluating(lesson_ID) SELECT ID FROM lessons WHERE Group_ID = ?';
     let sql3 = 'INSERT INTO learning(User_ID, Evaluation_ID) VALUES (?,?)';
     let sql4 = 'INSERT INTO marks VALUE (null)';

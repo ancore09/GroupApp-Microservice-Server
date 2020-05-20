@@ -8,7 +8,6 @@ const connection = mysql.createPool({
     database: env.database,
     password: env.password
 });
-//const bodyParser = require("body-parser");
 
 const service = new MicroMQ({
     name: 'news',
@@ -16,8 +15,6 @@ const service = new MicroMQ({
         url: 'amqp://' + env.rabbitip + ':5672',
     },
 });
-//service.use(bodyParser.json());
-//service.use(bodyParser.urlencoded({ extended: true }));
 
 service.get('/getNews', (req, res) => {
     let groupid = req.query.groupid;

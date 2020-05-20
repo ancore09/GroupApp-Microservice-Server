@@ -39,15 +39,6 @@ app.post('/uploadFile', async (req, res) => {
 
             file.mv('./uploads/' + file.md5 + extension.join(''));
 
-            // res.send({
-            // 	status: true,
-            // 	message: 'File is uploaded',
-            // 	data: {
-            // 		name: file.md5 + extension.join(''),
-            // 		mimetype: file.mimetype,
-            // 		size: file.size
-            // 	}
-            // });
             res.json({name: file.md5 + extension.join('')});
         }
     } catch (err) {
@@ -111,8 +102,6 @@ app.get('/getMessages', (req, res) => {
     } else if (room == 'BiologyClub') {
         res.send(JSON.stringify(Messages2));
     }
-    //console.log(Messages);
-    //res.send(JSON.stringify(Messages1));
 });
 
 io.use((socket, next) => {

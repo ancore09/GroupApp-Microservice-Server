@@ -68,7 +68,7 @@ service.get("/getUsers", (req, res) => {
 });
 
 service.action('addUserToGroup', async (meta, res) => {
-    let sql1 = 'INSERT INTO usergrouping(User_ID, Group_ID) VALUES (?,?)';
+    let sql = 'INSERT INTO usergrouping(User_ID, Group_ID) VALUES (?,?)';
 
     connection.query(sql, [meta.userid, meta.groupid], (err, results) => {
         if (err) return console.log(err);
