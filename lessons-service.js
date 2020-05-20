@@ -124,7 +124,7 @@ service.get('/getMarks', (req, res) => {
         '(SELECT mark_id FROM evaluating WHERE ID IN' +
         '(SELECT evaluation_id FROM learning WHERE user_id = (?)' +
         'AND lesson_id IN ' +
-        '(SELECT ID FROM lessons WHERE group_id = (?))) ORDER BY ID DESC';
+        '(SELECT ID FROM lessons WHERE group_id = (?)))) ORDER BY ID DESC';
 
     connection.query(sql, [loginid, groupid], (err, results) => {
         if (err) return console.log(err);
