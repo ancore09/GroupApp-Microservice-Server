@@ -12,6 +12,7 @@ const connection = mysql.createPool({
 
 const service = new MicroMQ({
     name: 'lessons',
+    microservices: ['groups-users'],
     rabbit: {
         url: 'amqp://' + env.rabbitip + ':5672',
     },
@@ -25,59 +26,63 @@ service.get('/getLearning', (req, res) => {
     let querydata = [];
     querydata.push(loginid);
 
-    let sql = 'SELECT * FROM learning WHERE User_ID = (SELECT ID FROM users WHERE ID = (?))';
+    let sql = 'SELECT * FROM learning WHERE User_ID = (?)';
     connection.query(sql, querydata, (err, results) => {
         if (err) return console.log(err);
         res.json(results);
     });
 });
 
-service.post('/postLesson', (req, res) => {
+service.post('/postLesson', async (req, res) => {
     let querydata = Object.values(req.body);
 
-    //let querydata = req.params;
+    let count = await service.ask('groups-users', {
+        server: {
+            action: 'getUsers',
+            meta: {
+                id: querydata[0]
+            }
+        }
+    });
+    let ids = []
+    for (let i = 0; i < count.response.length; i++) {
+        ids.push(count.response[i].user_id)
+    }
+
+    //res.json(count)
 
     let sql1 = 'INSERT INTO lessons (group_id, datedmy, theme, homework, profcomment, times) VALUES(?,?,?,?,?,?)';
-    let sql2 = 'SELECT COUNT(*) AS c FROM usergrouping WHERE group_id = (?)'
-    let sql3 = 'INSERT INTO evaluating (lesson_id) VALUES(?)';
-    let sql4 = 'INSERT INTO learning (user_id) SELECT user_id FROM usergrouping WHERE group_id = (?)';
+    //let sql2 = 'SELECT COUNT(*) AS c FROM usergrouping WHERE group_id = (?)'
+    let sql3 = 'INSERT INTO evaluating (lesson_id) VALUES (?)';
+    let sql4 = 'INSERT INTO learning (user_id) VALUES (?)';
     let sql5 = 'UPDATE learning SET evaluation_id = (?) WHERE ID IN (?)'
 
-    // connection.query(sql1, querydata, (err, results1) => {
-    //     if (err) return console.log(err);
-    //     console.log("LESSON INSERT")
-    //
-    //     connection.query(sql2, [querydata[0]], (err, results2) => {
-    //         if (err) return console.log(err);
-    //         console.log("STUDENT COUNT")
-    //
-    //         connection.query(sql4, [querydata[0]], (err, results4) => {
-    //             if (err) return console.log(err);
-    //             console.log("LEARNING INSERT")
-    //
-    //             for (let i = 0; i < results2[0].c; i++) {
-    //                 connection.query(sql3, [results1.insertId], (err, results3) => {
-    //                     if (err) return console.log(err);
-    //                     console.log("EVALUATING INSERT")
-    //
-    //                     for (let j = 0; j < results4.affectedRows; j++) {
-    //                         connection.query(sql5, [results3.insertId, results4.insertId + j], (err, results5) => {
-    //                             if (err) return console.log(err);
-    //                             console.log("LEARNING UPDATE")
-    //                             //res.send(results5)
-    //                         });
-    //                     }
-    //                     res.json({
-    //                         ok: true
-    //                     });
-    //                 });
-    //             }
-    //         });
-    //     });
-    // });
+    connection.query(sql1, querydata, (err, results1) => {
+        if (err) return console.log(err);
+        console.log("LESSON INSERT")
 
-    res.json({
-        ok: true
+        connection.query(sql4, [ids], (err, results4) => {
+            if (err) return console.log(err);
+            console.log("LEARNING INSERT")
+
+            for (let i = 0; i < count.response.length; i++) {
+                connection.query(sql3, [results1.insertId], (err, results3) => {
+                    if (err) return console.log(err);
+                    console.log("EVALUATING INSERT")
+
+                    for (let j = 0; j < results4.affectedRows; j++) {
+                        connection.query(sql5, [results3.insertId, results4.insertId + j], (err, results5) => {
+                            if (err) return console.log(err);
+                            console.log("LEARNING UPDATE")
+                            //res.send(results5)
+                        });
+                    }
+                    res.json({
+                        ok: true
+                    });
+                });
+            }
+        });
     });
 });
 
@@ -110,7 +115,7 @@ service.get('/getUserMarks', (req, res) => {
 
     let sql = 'SELECT * FROM marks WHERE ID IN ' +
         '(SELECT Mark_ID FROM evaluating WHERE ID IN ' +
-        '(SELECT Evaluation_ID FROM learning WHERE User_ID = (SELECT ID FROM users WHERE ID = (?))) AND Lesson_ID IN (?))';
+        '(SELECT Evaluation_ID FROM learning WHERE User_ID = (?)) AND Lesson_ID IN (?))';
     connection.query(sql, querydata, (err, results) => {
         if (err) return console.log(err);
         res.json(results);
@@ -123,8 +128,7 @@ service.get('/getMarks', (req, res) => {
 
     let sql = 'SELECT * FROM marks WHERE ID IN' +
         '(SELECT mark_id FROM evaluating WHERE ID IN' +
-        '(SELECT evaluation_id FROM learning WHERE user_id = ' +
-        '(SELECT ID FROM users WHERE ID = (?))) ' +
+        '(SELECT evaluation_id FROM learning WHERE user_id = (?)' +
         'AND lesson_id IN ' +
         '(SELECT ID FROM lessons WHERE group_id = (?))) ORDER BY ID DESC';
 
@@ -151,7 +155,7 @@ service.get('/getEvaluation', (req, res) => {
     let querydata = [];
     querydata.push(loginid);
 
-    let sql = 'SELECT * FROM evaluating WHERE ID IN (SELECT Evaluation_ID FROM learning WHERE User_ID = (SELECT ID FROM users WHERE ID = (?)))';
+    let sql = 'SELECT * FROM evaluating WHERE ID IN (SELECT Evaluation_ID FROM learning WHERE User_ID = (?))';
     connection.query(sql, querydata, (err, results) => {
         if (err) return console.log(err);
         res.json(results);

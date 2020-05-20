@@ -131,8 +131,14 @@ service.post('/addUserToGroup', (req,res) => {
     });
 });
 
-service.action('getUsers', async (req, res) => {
-    
+service.action('getUsers', async (meta, res) => {
+    let sql = 'SELECT user_id FROM usergrouping WHERE group_id = (?)'
+
+    connection.query(sql, [meta.id], (err, results) => {
+        if (err) return console.log(err);
+
+        res.json(results);
+    });
 });
 
 //MARK: groups
